@@ -23,6 +23,7 @@ from ocr_digits.ml.classifier import clf_validation
 
 description='''
 
+    ./train_model --image_path ../../ocr_datasets/train_digits_28_28
     ./train_model --ttf_path ../../ocr_datasets/ttf --image_path ../../ocr_datasets/train_digits_28_28
   
 '''
@@ -80,8 +81,8 @@ class trainDigits:
 
 
     def process(self, ttf_path, img_path):
-        traverseFolders(newImages_from_ttf, ttf_path, ftype='ttf')
-        createJsonfile(img_path)
+        # traverseFolders(newImages_from_ttf, ttf_path, ftype='ttf')
+        # createJsonfile(img_path)
         traverseFolders(self.get_images_from_folder, img_path, ftype='image')
 
     
@@ -92,7 +93,7 @@ if __name__ == "__main__":
         formatter_class=RawTextHelpFormatter)
 
     parser.add_argument('--ttf_path', dest='ttf',
-                        default=None, required=True,
+                        default=None, required=False,
                         help='get fonts')
 
     parser.add_argument('--image_path', dest='image',
@@ -100,7 +101,8 @@ if __name__ == "__main__":
                         help='get images')
 
     options = parser.parse_args()
-    ttf_path = os.path.expanduser(options.ttf)
+    ttf_path = ''
+    # ttf_path = os.path.expanduser(options.ttf)
     img_path = os.path.expanduser(options.image)
 
     test = trainDigits()
