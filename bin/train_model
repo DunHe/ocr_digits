@@ -1,0 +1,133 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+Create on 2016-01-18 10:29:14
+
+@author: huangzhenghua
+'''
+import os
+import string
+import shutil
+import cv2
+import numpy as np
+import argparse
+from argparse import RawTextHelpFormatter
+from PIL import Image, ImageFont, ImageDraw
+from sklearn.externals import joblib
+from ocr_digits.common.traverse import traverseFolders
+from ocr_digits.ml.format import formatDigit
+from ocr_digits.ml.classifier import accuracy_score
+from ocr_digits.ml.classifier import find_best_classifier
+from ocr_digits.ml.classifier import clf_validation
+
+
+description='''
+
+    ./train_model --ttf_path ../../ocr_datasets/ttf --image_path ../../ocr_datasets/train_digits_28_28
+  
+'''
+
+
+def newImages_from_ttf(ttf, txt=['0','1','2','3','4','5','6','7','8','9']):
+    font = ImageFont.truetype(ttf, 25)
+    font_name = font.getname()[0]
+    dst_path = os.path.join('..', '..', 'ocr_datasets', 'train_digits_28_28')
+    for digit in txt:
+        img = Image.new("RGBA", (28, 28), (0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.text((0, 0), digit, (255, 255, 255), font=font)
+        ImageDraw.Draw(img)
+        if not os.path.exists(os.path.join(dst_path, digit)):
+            os.makedirs(os.path.join(dst_path, digit))
+        if os.path.exists(os.path.join(dst_path, digit, font_name+'.png')):
+            os.remove(os.path.join(dst_path, digit, font_name+'.png'))
+        img.save(os.path.join(dst_path, digit, font_name+'.png'))
+
+
+def createJsonfile(dir):
+    json = '{"0": "0", "1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9"}'
+    txt = '0 0\n1 1\n2 2\n3 3\n4 4\n5 5\n6 6\n7 7\n8 8\n9 9'
+
+    file_json = os.path.join(dir, 'y_to_tag.json')
+    file_txt = os.path.join(dir, 'y_to_tag.txt')
+
+    if not os.path.exists(file_json):
+        f = file(file_json, 'w')
+        f.write(json)
+        f.close()
+
+    if not os.path.exists(file_txt):
+        f = file(file_txt, 'w')
+        f.write(txt)
+        f.close()
+
+
+class trainDigits:
+
+    def __init__(self):
+        self.data = np.array([], dtype=np.uint8)
+        self.target = np.array([], dtype=np.uint8)
+
+
+    def get_images_from_folder(self, img_path):
+        dir = string.split(img_path, '/')[-2]
+        digit = formatDigit(cv2.imread(img_path, 0), 1, 784)
+        if len(self.data) == 0:
+            self.data = digit
+        else:
+            self.data = np.vstack((self.data, digit))
+        self.target = np.hstack((self.target, dir))
+
+
+    def process(self, ttf_path, img_path):
+        traverseFolders(newImages_from_ttf, ttf_path, ftype='ttf')
+        createJsonfile(img_path)
+        traverseFolders(self.get_images_from_folder, img_path, ftype='image')
+
+    
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(
+        description=description,
+        formatter_class=RawTextHelpFormatter)
+
+    parser.add_argument('--ttf_path', dest='ttf',
+                        default=None, required=True,
+                        help='get fonts')
+
+    parser.add_argument('--image_path', dest='image',
+                        default=None, required=True,
+                        help='get images')
+
+    options = parser.parse_args()
+    ttf_path = os.path.expanduser(options.ttf)
+    img_path = os.path.expanduser(options.image)
+
+    test = trainDigits()
+    test.process(ttf_path, img_path)
+
+    print 'training:.....'
+    clf_svm, clf_rf = find_best_classifier(test.data, test.target)
+    print 'training finished'
+
+    train_model_svm_dir = os.path.join('..', '..', 'ocr_trained_model', 'trained_model_svm') 
+    if os.path.exists(train_model_svm_dir):
+        shutil.rmtree(train_model_svm_dir)
+    os.makedirs(train_model_svm_dir)
+    train_model_rf_dir = os.path.join('..', '..', 'ocr_trained_model', 'trained_model_rf') 
+    if os.path.exists(train_model_rf_dir):
+        shutil.rmtree(train_model_rf_dir)
+    os.makedirs(train_model_rf_dir)
+
+    train_model_svm_path = os.path.join(train_model_svm_dir, 'trained_model_svm.pkl')
+    joblib.dump(clf_svm, train_model_svm_path)
+
+    train_model_rf_path = os.path.join(train_model_rf_dir, 'trained_model_rf.pkl')
+    joblib.dump(clf_rf, train_model_rf_path)
+    print 'dump finished'
+
+    clf_svm = joblib.load('../../ocr_trained_model/trained_model_svm/trained_model_svm.pkl')
+    clf_rf = joblib.load('../../ocr_trained_model/trained_model_rf/trained_model_rf.pkl')
+
+    clf_validation(test.data, test.target, clf_svm, 'SVM')
+    clf_validation(test.data, test.target, clf_rf, 'RandForest')
