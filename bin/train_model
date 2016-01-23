@@ -106,25 +106,25 @@ if __name__ == "__main__":
     test = trainDigits()
     test.process(ttf_path, img_path)
 
-    print 'training:.....'
-    clf_svm, clf_rf = find_best_classifier(test.data, test.target)
-    print 'training finished'
+    # print 'training:.....'
+    # clf_svm, clf_rf = find_best_classifier(test.data, test.target)
+    # print 'training finished'
 
-    train_model_svm_dir = os.path.join('..', '..', 'ocr_trained_model', 'trained_model_svm') 
-    if os.path.exists(train_model_svm_dir):
-        shutil.rmtree(train_model_svm_dir)
-    os.makedirs(train_model_svm_dir)
-    train_model_rf_dir = os.path.join('..', '..', 'ocr_trained_model', 'trained_model_rf') 
-    if os.path.exists(train_model_rf_dir):
-        shutil.rmtree(train_model_rf_dir)
-    os.makedirs(train_model_rf_dir)
+    # train_model_svm_dir = os.path.join('..', '..', 'ocr_trained_model', 'trained_model_svm') 
+    # if os.path.exists(train_model_svm_dir):
+        # shutil.rmtree(train_model_svm_dir)
+    # os.makedirs(train_model_svm_dir)
+    # train_model_rf_dir = os.path.join('..', '..', 'ocr_trained_model', 'trained_model_rf') 
+    # if os.path.exists(train_model_rf_dir):
+        # shutil.rmtree(train_model_rf_dir)
+    # os.makedirs(train_model_rf_dir)
 
-    train_model_svm_path = os.path.join(train_model_svm_dir, 'trained_model_svm.pkl')
-    joblib.dump(clf_svm, train_model_svm_path)
+    # train_model_svm_path = os.path.join(train_model_svm_dir, 'trained_model_svm.pkl')
+    # joblib.dump(clf_svm, train_model_svm_path)
 
-    train_model_rf_path = os.path.join(train_model_rf_dir, 'trained_model_rf.pkl')
-    joblib.dump(clf_rf, train_model_rf_path)
-    print 'dump finished'
+    # train_model_rf_path = os.path.join(train_model_rf_dir, 'trained_model_rf.pkl')
+    # joblib.dump(clf_rf, train_model_rf_path)
+    # print 'dump finished'
 
     clf_svm = joblib.load('../../ocr_trained_model/trained_model_svm/trained_model_svm.pkl')
     clf_rf = joblib.load('../../ocr_trained_model/trained_model_rf/trained_model_rf.pkl')

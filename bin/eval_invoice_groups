@@ -18,8 +18,8 @@ from ocr_digits.ml.classifier import accuracy_score
 
 
 description='''
-    ./eval_invoice_groups --invoice ../../ocr_datasets/training_dir_groups/group10/0609145140i7gzW.jpg --classifier_path ../../ocr_trained_model/trained_model/trained_model.pkl
-    ./eval_invoice_groups --invoice_group ../../ocr_datasets/training_dir_groups --classifier_path ../../ocr_trained_model/trained_model/trained_model.pkl
+    ./eval_invoice_groups --invoice ../../ocr_datasets/training_dir_groups/group10/0609145140i7gzW.jpg --classifier_path ../../ocr_trained_model/trained_model_svm/trained_model_svm.pkl
+    ./eval_invoice_groups --invoice_group ../../ocr_datasets/training_dir_groups --classifier_path ../../ocr_trained_model/trained_model_svm/trained_model_svm.pkl
 '''
 
 
@@ -93,8 +93,8 @@ class Invoice:
 
     def invoice_predict(self, clf_path):
         clf = joblib.load(clf_path)
-        if len(daima_data) != 0 and len(daima_target) != 0 \
-           and len(haoma_data) != 0 and len(haoma_target) != 0:
+        if len(self.daima_data) != 0 and len(self.daima_target) != 0 \
+           and len(self.haoma_data) != 0 and len(self.haoma_target) != 0:
 
             print accuracy_score(self.daima_target,
                                  clf.predict(self.daima_data))

@@ -36,6 +36,7 @@ def formatDigit(digit,
 
     return digit
 
+
 def resizeDigit(digit,
                 h='', w='',
                 thresh = 'automatic',
