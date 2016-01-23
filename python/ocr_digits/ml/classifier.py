@@ -47,14 +47,12 @@ def find_best_classifier(data, target):
         ]},
     ]
 
-    print 'svm....'
     clf_svm = GridSearchCV(
             SVC(),
             param[0].values()[0],
             n_jobs = -1)
     clf_svm.fit(x_train, y_train)
 
-    print 'rf....'
     clf_rf = GridSearchCV(
             RandomForestClassifier(),
             param[1].values()[0],

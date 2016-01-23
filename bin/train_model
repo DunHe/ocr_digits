@@ -30,7 +30,7 @@ description='''
 
 def newImages_from_ttf(ttf, txt=['0','1','2','3','4','5','6','7','8','9']):
     font = ImageFont.truetype(ttf, 25)
-    font_name = font.getname()[0]
+    img_name = font.getname()[0]+'.png'
     dst_path = os.path.join('..', '..', 'ocr_datasets', 'train_digits_28_28')
     for digit in txt:
         img = Image.new("RGBA", (28, 28), (0, 0, 0))
@@ -39,9 +39,9 @@ def newImages_from_ttf(ttf, txt=['0','1','2','3','4','5','6','7','8','9']):
         ImageDraw.Draw(img)
         if not os.path.exists(os.path.join(dst_path, digit)):
             os.makedirs(os.path.join(dst_path, digit))
-        if os.path.exists(os.path.join(dst_path, digit, font_name+'.png')):
-            os.remove(os.path.join(dst_path, digit, font_name+'.png'))
-        img.save(os.path.join(dst_path, digit, font_name+'.png'))
+        if os.path.exists(os.path.join(dst_path, digit, img_name)):
+            os.remove(os.path.join(dst_path, digit, img_name))
+        img.save(os.path.join(dst_path, digit, img_name))
 
 
 def createJsonfile(dir):
@@ -106,25 +106,22 @@ if __name__ == "__main__":
     test = trainDigits()
     test.process(ttf_path, img_path)
 
-    # print 'training:.....'
-    # clf_svm, clf_rf = find_best_classifier(test.data, test.target)
-    # print 'training finished'
+    clf_svm, clf_rf = find_best_classifier(test.data, test.target)
 
-    # train_model_svm_dir = os.path.join('..', '..', 'ocr_trained_model', 'trained_model_svm') 
-    # if os.path.exists(train_model_svm_dir):
-        # shutil.rmtree(train_model_svm_dir)
-    # os.makedirs(train_model_svm_dir)
-    # train_model_rf_dir = os.path.join('..', '..', 'ocr_trained_model', 'trained_model_rf') 
-    # if os.path.exists(train_model_rf_dir):
-        # shutil.rmtree(train_model_rf_dir)
-    # os.makedirs(train_model_rf_dir)
+    train_model_svm_dir = os.path.join('..', '..', 'ocr_trained_model', 'trained_model_svm') 
+    if os.path.exists(train_model_svm_dir):
+        shutil.rmtree(train_model_svm_dir)
+    os.makedirs(train_model_svm_dir)
+    train_model_rf_dir = os.path.join('..', '..', 'ocr_trained_model', 'trained_model_rf') 
+    if os.path.exists(train_model_rf_dir):
+        shutil.rmtree(train_model_rf_dir)
+    os.makedirs(train_model_rf_dir)
 
-    # train_model_svm_path = os.path.join(train_model_svm_dir, 'trained_model_svm.pkl')
-    # joblib.dump(clf_svm, train_model_svm_path)
+    train_model_svm_path = os.path.join(train_model_svm_dir, 'trained_model_svm.pkl')
+    joblib.dump(clf_svm, train_model_svm_path)
 
-    # train_model_rf_path = os.path.join(train_model_rf_dir, 'trained_model_rf.pkl')
-    # joblib.dump(clf_rf, train_model_rf_path)
-    # print 'dump finished'
+    train_model_rf_path = os.path.join(train_model_rf_dir, 'trained_model_rf.pkl')
+    joblib.dump(clf_rf, train_model_rf_path)
 
     clf_svm = joblib.load('../../ocr_trained_model/trained_model_svm/trained_model_svm.pkl')
     clf_rf = joblib.load('../../ocr_trained_model/trained_model_rf/trained_model_rf.pkl')
