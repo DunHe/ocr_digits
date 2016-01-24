@@ -16,7 +16,7 @@ from sklearn.externals import joblib
 from ocr_digits.common.traverse import traverseFolders
 from ocr_digits.reco_digits.recoDigits import cropDigits
 from ocr_digits.ml.classifier import accuracy_score
-
+import shutil
 
 description='''
     ./eval_invoice_groups --invoice ../../ocr_datasets/training_dir_groups/group10/0609145140i7gzW.jpg --classifier_path ../../ocr_trained_model/trained_model_svm/trained_model_svm.pkl
@@ -29,7 +29,7 @@ def jsonLoad(file_path, feature, subfeature=''):
     jsons = json.loads(file.read())
     file.close()
 
-    if subfeature != '':    
+    if subfeature != '':
         return jsons[feature][subfeature]
     else:
         return jsons[feature]
@@ -37,23 +37,55 @@ def jsonLoad(file_path, feature, subfeature=''):
 
 class Invoice:
 
-    def __init__(self):
+    def __init__(self, is_debug=True, debug_dir="/tmp/invoice_debug",
+                 digit_w=28, digit_h=28):
         self.daima_data = np.array([], dtype=np.uint8)
         self.daima_target = np.array([], dtype=np.uint8)
         self.haoma_data = np.array([], dtype=np.uint8)
         self.haoma_target = np.array([], dtype=np.uint8)
-        
+        self.is_debug = is_debug
+        self.debug_dir = debug_dir
+        self.digit_w = 28
+        self.digit_h = 28
+
+    def show_field(self, img,
+                   img_path,
+                   digits,
+                   field_name,
+                   field_x, field_y,
+                   field_w, field_h,
+                   ):
+        key_name = field_name
+        field_img = img[int(field_y): int(field_y) + int(field_h),
+            int(field_x): int(field_x) + int(field_w)]
+        basename = os.path.basename(img_path)
+        basename = basename.replace(".jpg", "")
+        field_path = os.path.join(
+                self.debug_dir,
+                "%s_%s.jpg" % (basename, key_name))
+        cv2.imwrite(field_path, field_img)
+        i = 0
+        digit_shape = (self.digit_w, self.digit_h)
+        for digit in digits:
+            digit_path = os.path.join(
+                self.debug_dir,
+                "%s_%s_%d.jpg" % (basename, key_name, i))
+            cv2.imwrite(digit_path, digit.reshape(digit_shape))
+            i += 1
 
     def invoice_process(self, dir):
+        if self.is_debug:
+            if not os.path.isdir(self.debug_dir):
+                os.makedirs(self.debug_dir)
 
         img = cv2.imread(dir, 0)
 
         daima = jsonLoad(dir+'.desc.json',
                          'fapiaodaima', 'bounding_box')
-        daima_x = float(daima['top_left'][0])
-        daima_y = float(daima['top_left'][1])
-        daima_w = float(daima['low_right'][0]) - daima_x
-        daima_h = float(daima['low_right'][1]) - daima_y
+        daima_x = int(float(daima['top_left'][0]))
+        daima_y = int(float(daima['top_left'][1]))
+        daima_w = int(float(daima['low_right'][0])) - daima_x
+        daima_h = int(float(daima['low_right'][1])) - daima_y
         daima_text = jsonLoad(dir+'.desc.json',
                 'fapiaodaima', 'text').encode('utf-8')
 
@@ -63,22 +95,32 @@ class Invoice:
                     img,
                     int(daima_x), int(daima_y),
                     int(daima_h), int(daima_w),
-                    daima_len)
+                    daima_len,
+                    self.digit_w, self.digit_h)
             for i in range(daima_len):
                 if len(self.daima_data) == 0:
                     self.daima_data = digits[i]
                 else:
                     self.daima_data = np.vstack((self.daima_data, digits[i]))
-                self.daima_target = np.hstack((self.daima_target, daima_text[i]))
+                self.daima_target = np.hstack((self.daima_target,
+                                               daima_text[i]))
+            if self.is_debug:
+                self.show_field(img,
+                                dir,
+                                digits=digits,
+                                field_name="daima",
+                                field_x=int(daima_x), field_y=int(daima_y),
+                                field_w=int(daima_w), field_h=int(daima_h),)
+                
         else:
             raise ValueError("Please correct %s. "
                 "Daima len is not equal to %d " % (dir, daima_len))
 
         haoma = jsonLoad(dir+'.desc.json', 'fapiaohaoma', 'bounding_box')
-        haoma_x = float(haoma['top_left'][0])
-        haoma_y = float(haoma['top_left'][1])
-        haoma_w = float(haoma['low_right'][0]) - haoma_x
-        haoma_h = float(haoma['low_right'][1]) - haoma_y
+        haoma_x = int(float(haoma['top_left'][0]))
+        haoma_y = int(float(haoma['top_left'][1]))
+        haoma_w = int(float(haoma['low_right'][0])) - haoma_x
+        haoma_h = int(float(haoma['low_right'][1])) - haoma_y
         haoma_text = jsonLoad(dir+'.desc.json',
                 'fapiaohaoma', 'text').encode('utf-8')
 
@@ -95,6 +137,13 @@ class Invoice:
                 else:
                     self.haoma_data = np.vstack((self.haoma_data, digits[i]))
                 self.haoma_target = np.hstack((self.haoma_target, haoma_text[i]))
+            if self.is_debug:
+                self.show_field(img,
+                                dir,
+                                digits=digits,
+                                field_name="haoma",
+                                field_x=int(haoma_x), field_y=int(haoma_y),
+                                field_w=int(haoma_w), field_h=int(haoma_h),)
         else:
             raise ValueError("Please correct %s. "
                 "haoma len is not equal to %d " % (dir, haoma_len))

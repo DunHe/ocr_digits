@@ -15,7 +15,7 @@ from ocr_digits.reco_digits.contours import findContours
 from ocr_digits.reco_digits.contours import drawContours
 
 
-def cropDigits(img, x, y, h, w, num_chars):
+def cropDigits(img, x, y, h, w, num_chars, digit_w=28, digit_h=28):
 
     if len(img.shape) == 3:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -42,7 +42,7 @@ def cropDigits(img, x, y, h, w, num_chars):
         _digit = resizeDigit(_digit, 100, 100)
         _digit = cv2.morphologyEx(_digit, cv2.MORPH_OPEN, kernel)
         _digit = cv2.morphologyEx(_digit, cv2.MORPH_CLOSE, kernel)
-        _digit = resizeDigit(_digit, 28, 28, thresh='manual', bitwise=False)
+        _digit = resizeDigit(_digit, digit_w, digit_h, thresh='manual', bitwise=False)
         _digit = formatDigit(_digit, 1, 784, thresh=False, bitwise=False)
 
         digits.append(_digit)
