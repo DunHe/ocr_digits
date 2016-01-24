@@ -57,19 +57,23 @@ class Invoice:
         daima_text = jsonLoad(dir+'.desc.json',
                 'fapiaodaima', 'text').encode('utf-8')
 
-        if len(daima_text) == 12:
+        daima_len = 12
+        if len(daima_text) == daima_len:
             digits = cropDigits(
                     img,
                     int(daima_x), int(daima_y),
                     int(daima_h), int(daima_w),
-                    12)
-            for i in range(12):
+                    daima_len)
+            for i in range(daima_len):
                 if len(self.daima_data) == 0:
                     self.daima_data = digits[i]
                 else:
                     self.daima_data = np.vstack((self.daima_data, digits[i]))
                 self.daima_target = np.hstack((self.daima_target, daima_text[i]))
-        
+        else:
+            raise ValueError("Please correct %s. "
+                "Daima len is not equal to %d " % (dir, daima_len))
+
         haoma = jsonLoad(dir+'.desc.json', 'fapiaohaoma', 'bounding_box')
         haoma_x = float(haoma['top_left'][0])
         haoma_y = float(haoma['top_left'][1])
@@ -78,19 +82,22 @@ class Invoice:
         haoma_text = jsonLoad(dir+'.desc.json',
                 'fapiaohaoma', 'text').encode('utf-8')
 
-        if len(haoma_text) == 8:
+        haoma_len = 8
+        if len(haoma_text) == haoma_len:
             digits = cropDigits(
                     img,
                     int(haoma_x), int(haoma_y),
                     int(haoma_h), int(haoma_w),
-                    8)
-            for i in range(8):
+                    haoma_len)
+            for i in range(haoma_len):
                 if len(self.haoma_data) == 0:
                     self.haoma_data = digits[i]
                 else:
                     self.haoma_data = np.vstack((self.haoma_data, digits[i]))
                 self.haoma_target = np.hstack((self.haoma_target, haoma_text[i]))
-
+        else:
+            raise ValueError("Please correct %s. "
+                "haoma len is not equal to %d " % (dir, haoma_len))
 
     def invoice_predict(self, clf_path):
         clf = joblib.load(clf_path)
