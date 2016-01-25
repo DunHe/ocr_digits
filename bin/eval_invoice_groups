@@ -49,6 +49,7 @@ class Invoice:
         self.digit_h = digit_h
 
     def show_field(self, img,
+                   binImg,
                    img_path,
                    digits,
                    field_name,
@@ -64,6 +65,10 @@ class Invoice:
                 self.debug_dir,
                 "%s_%s.jpg" % (basename, key_name))
         cv2.imwrite(field_path, field_img)
+        bin_field_path = os.path.join(
+                self.debug_dir,
+                "%s_%s_bin.jpg" % (basename, key_name))
+        cv2.imwrite(bin_field_path, binImg)
         i = 0
         digit_shape = (self.digit_w, self.digit_h)
         for digit in digits:
@@ -91,7 +96,7 @@ class Invoice:
 
         daima_len = 12
         if len(daima_text) == daima_len:
-            digits = cropDigits(
+            digits, binImg = cropDigits(
                     img,
                     int(daima_x), int(daima_y),
                     int(daima_h), int(daima_w),
@@ -106,6 +111,7 @@ class Invoice:
                                                daima_text[i]))
             if self.is_debug:
                 self.show_field(img,
+                                binImg,
                                 dir,
                                 digits=digits,
                                 field_name="daima",
@@ -126,7 +132,7 @@ class Invoice:
 
         haoma_len = 8
         if len(haoma_text) == haoma_len:
-            digits = cropDigits(
+            digits, binImg = cropDigits(
                     img,
                     int(haoma_x), int(haoma_y),
                     int(haoma_h), int(haoma_w),
@@ -139,6 +145,7 @@ class Invoice:
                 self.haoma_target = np.hstack((self.haoma_target, haoma_text[i]))
             if self.is_debug:
                 self.show_field(img,
+                                binImg,
                                 dir,
                                 digits=digits,
                                 field_name="haoma",
