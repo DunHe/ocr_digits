@@ -57,12 +57,13 @@ def cropDigits(img, img_x, img_y, img_h, img_w, num_chars, digit_w=28, digit_h=2
     for i in range(num_chars):
         left = min_start_x + (min_char_width + min_col_width) * i
         _digit = cropImage(cropImg, left, 0, img_h, min_char_width)
-        _digit = resizeDigit(_digit, 100, 100)
 
-        # _digit = cv2.morphologyEx(_digit, cv2.MORPH_OPEN, kernel)
-        # _digit = cv2.morphologyEx(_digit, cv2.MORPH_CLOSE, kernel)
-        _digit = resizeDigit(_digit, digit_w, digit_h, thresh='manual', bitwise=False)
-        _digit = formatDigit(_digit, 1, 784, thresh=False, bitwise=False)
+        _digit = resizeDigit(_digit,
+                             h=digit_w, w=digit_h,
+                             thresh='manual', bitwise=False)
+        _digit = formatDigit(_digit,
+                             h=1, w=784,
+                             thresh=False, bitwise=False)
 
         digits.append(_digit)
     return digits
