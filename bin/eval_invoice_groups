@@ -45,8 +45,8 @@ class Invoice:
         self.haoma_target = np.array([], dtype=np.uint8)
         self.is_debug = is_debug
         self.debug_dir = debug_dir
-        self.digit_w = 28
-        self.digit_h = 28
+        self.digit_w = digit_w
+        self.digit_h = digit_h
 
     def show_field(self, img,
                    img_path,

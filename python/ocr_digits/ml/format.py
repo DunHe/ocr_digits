@@ -16,7 +16,7 @@ def formatDigit(digit,
                 bitwise = True):
 
     if h is not '' and w is not '':
-        digit = np.reshape(digit, (h, w))
+        digit = digit.reshape((h, w))
 
         if thresh is 'manual':
             for i in range(h):
