@@ -24,7 +24,7 @@ from ocr_digits.reco_digits.recoDigits import cropDigits
 
 description='''
 
-    ./train_model --ttf_path ../../ocr_datasets/ttf --image_path ../../ocr_datasets/train_digits_28_28/src 
+    ./train_model --ttf_path ../../ocr_datasets/ttf --image_path ../../ocr_datasets/train_digits_28_28
   
 '''
 
@@ -33,7 +33,7 @@ def newImages_from_ttf(ttf, txt='0 1 2 3 4 5 6 7 8 9'):
     font = ImageFont.truetype(ttf, 28)
     img_name = font.getname()[0]+'.png'
     dst_path = os.path.join('..', '..', 'ocr_datasets',
-                            'train_digits_28_28', 'src')
+                            'train_digits_28_28')
     img = Image.new("RGBA", (400, 40), (0, 0, 0))
     draw = ImageDraw.Draw(img)
     draw.text((0, 0), txt, (255, 255, 255), font=font)
