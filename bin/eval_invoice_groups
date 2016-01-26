@@ -13,7 +13,7 @@ import numpy as np
 import argparse
 from argparse import RawTextHelpFormatter
 from sklearn.externals import joblib
-from ocr_digits.common.traverse import traverseFolders
+from ocr_digits.common.base import Base
 from ocr_digits.reco_digits.recoDigits import cropDigits
 from ocr_digits.ml.classifier import accuracy_score
 import shutil
@@ -35,50 +35,10 @@ def jsonLoad(file_path, feature, subfeature=''):
         return jsons[feature]
 
 
-class Invoice:
+class Invoice(Base):
 
-    def __init__(self, is_debug=True, debug_dir="/tmp/invoice_debug",
-                 digit_w=28, digit_h=28):
-        self.daima_data = np.array([], dtype=np.uint8)
-        self.daima_target = np.array([], dtype=np.uint8)
-        self.haoma_data = np.array([], dtype=np.uint8)
-        self.haoma_target = np.array([], dtype=np.uint8)
-        self.is_debug = is_debug
-        self.debug_dir = debug_dir
-        self.digit_w = digit_w
-        self.digit_h = digit_h
 
-    def show_field(self, img,
-                   binImg,
-                   img_path,
-                   digits,
-                   field_name,
-                   field_x, field_y,
-                   field_w, field_h,
-                   ):
-        key_name = field_name
-        field_img = img[int(field_y): int(field_y) + int(field_h),
-            int(field_x): int(field_x) + int(field_w)]
-        basename = os.path.basename(img_path)
-        basename = basename.replace(".jpg", "")
-        field_path = os.path.join(
-                self.debug_dir,
-                "%s_%s.jpg" % (basename, key_name))
-        cv2.imwrite(field_path, field_img)
-        bin_field_path = os.path.join(
-                self.debug_dir,
-                "%s_%s_bin.jpg" % (basename, key_name))
-        cv2.imwrite(bin_field_path, binImg)
-        i = 0
-        digit_shape = (self.digit_w, self.digit_h)
-        for digit in digits:
-            digit_path = os.path.join(
-                self.debug_dir,
-                "%s_%s_%d.jpg" % (basename, key_name, i))
-            cv2.imwrite(digit_path, digit.reshape(digit_shape))
-            i += 1
-
-    def invoice_process(self, dir):
+    def process(self, dir):
         if self.is_debug:
             if not os.path.isdir(self.debug_dir):
                 os.makedirs(self.debug_dir)
@@ -150,12 +110,12 @@ class Invoice:
                                 digits=digits,
                                 field_name="haoma",
                                 field_x=int(haoma_x), field_y=int(haoma_y),
-                                field_w=int(haoma_w), field_h=int(haoma_h),)
+                                field_w=int(haoma_w), field_h=int(haoma_h))
         else:
             raise ValueError("Please correct %s. "
                 "haoma len is not equal to %d " % (dir, haoma_len))
 
-    def invoice_predict(self, clf_path):
+    def predict(self, clf_path):
         clf = joblib.load(clf_path)
         if len(self.daima_data) != 0 and len(self.daima_target) != 0 \
            and len(self.haoma_data) != 0 and len(self.haoma_target) != 0:
@@ -186,16 +146,16 @@ if __name__ == "__main__":
     
     options = parser.parse_args()
 
-    test = Invoice()
+    test = Invoice(debug_dir='/tmp/invoice_debug/')
 
     if options.invoice:
         invoice = os.path.expanduser(options.invoice)
-        test.invoice_process(invoice)
+        test.process(invoice)
     if options.invoice_group:
         invoice_group = os.path.expanduser(options.invoice_group)
-        traverseFolders(
-            test.invoice_process,
+        test.traverseFolders(
+            test.process,
             invoice_group, ftype='image')
     if options.clf:
         clf_path = os.path.expanduser(options.clf)
-        test.invoice_predict(clf_path)
+        test.predict(clf_path)

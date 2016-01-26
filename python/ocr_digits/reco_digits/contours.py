@@ -4,6 +4,8 @@ Create on 2016-01-18 10:29:14
 
 @author: huangzhenghua
 '''
+
+import copy
 import cv2
 import numpy as np
 
@@ -18,10 +20,16 @@ def findContours(imgray,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY, 11, 2)
 
-    _, contours, _ = cv2.findContours(
-        imgray.copy(),
-        cv2.RETR_TREE,
-        cv2.CHAIN_APPROX_SIMPLE)
+    if cv2.__version__[0] == "2":
+        contours, hierarchy = cv2.findContours(
+            copy.deepcopy(imgray),
+            cv2.RETR_TREE,
+            cv2.CHAIN_APPROX_SIMPLE)
+    else:
+        _, contours, hierarchy = cv2.findContours(
+            copy.deepcopy(imgray),
+            cv2.RETR_TREE,
+            cv2.CHAIN_APPROX_SIMPLE)
 
     pst = [[(0, 0), (0, 0)]]
 

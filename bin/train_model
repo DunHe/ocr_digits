@@ -15,36 +15,34 @@ import argparse
 from argparse import RawTextHelpFormatter
 from PIL import Image, ImageFont, ImageDraw
 from sklearn.externals import joblib
-from ocr_digits.common.traverse import traverseFolders
+from ocr_digits.common.base import Base
 from ocr_digits.ml.format import formatDigit
 from ocr_digits.ml.classifier import find_best_classifier
 from ocr_digits.ml.classifier import clf_validation
+from ocr_digits.reco_digits.recoDigits import cropDigits
 
 
 description='''
 
-    ./train_model --image_path ../../ocr_datasets/train_digits_28_28
-    ./train_model --ttf_path ../../ocr_datasets/ttf --image_path ../../ocr_datasets/train_digits_28_28
+    ./train_model --ttf_path ../../ocr_datasets/ttf --image_path ../../ocr_datasets/train_digits_28_28/src 
   
 '''
 
 
-def newImages_from_ttf(ttf, txt=['0','1','2','3',\
-                       '4','5','6','7','8','9']):
-    font = ImageFont.truetype(ttf, 25)
+def newImages_from_ttf(ttf, txt='0 1 2 3 4 5 6 7 8 9'):
+    font = ImageFont.truetype(ttf, 28)
     img_name = font.getname()[0]+'.png'
     dst_path = os.path.join('..', '..', 'ocr_datasets',
-                            'train_digits_28_28')
-    for digit in txt:
-        img = Image.new("RGBA", (28, 28), (0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.text((0, 0), digit, (255, 255, 255), font=font)
-        ImageDraw.Draw(img)
-        if not os.path.exists(os.path.join(dst_path, digit)):
-            os.makedirs(os.path.join(dst_path, digit))
-        if os.path.exists(os.path.join(dst_path, digit, img_name)):
-            os.remove(os.path.join(dst_path, digit, img_name))
-        img.save(os.path.join(dst_path, digit, img_name))
+                            'train_digits_28_28', 'src')
+    img = Image.new("RGBA", (400, 40), (0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.text((0, 0), txt, (255, 255, 255), font=font)
+    ImageDraw.Draw(img)
+    if not os.path.exists(os.path.join(dst_path)):
+        os.makedirs(os.path.join(dst_path))
+    if os.path.exists(os.path.join(dst_path, img_name)):
+        os.remove(os.path.join(dst_path, img_name))
+    img.save(os.path.join(dst_path, img_name))
 
 
 def createJsonfile(dir):
@@ -66,29 +64,47 @@ def createJsonfile(dir):
         f.close()
 
 
-class trainDigits:
-
-    def __init__(self):
-        self.data = np.array([], dtype=np.uint8)
-        self.target = np.array([], dtype=np.uint8)
+class trainDigits(Base):
 
 
     def get_images_from_folder(self, img_path):
-        dir = string.split(img_path, '/')[-2]
-        digit = formatDigit(cv2.imread(img_path, 0), 1, 784)
-        if len(self.data) == 0:
-            self.data = digit
-        else:
-            self.data = np.vstack((self.data, digit))
-        self.target = np.hstack((self.target, dir))
+        
+        if self.is_debug:
+            if not os.path.isdir(self.debug_dir):
+                os.makedirs(self.debug_dir)
+
+        img = cv2.imread(img_path, 0)
+        img = 255-img
+        digits, binImg = cropDigits(img,
+                               0, 0, 40, 400,
+                               10,
+                               self.digit_w, self.digit_h)
+        i = 0
+        for digit in digits:
+            if len(self.data) == 0:
+                self.data = digit
+            else:
+                self.data = np.vstack((self.data, digit))
+            self.target = np.hstack((self.target, str(i)))
+            i += 1
+        if self.is_debug:
+            self.show_field(img,
+                            binImg,
+                            img_path,
+                            digits=digits,
+                            field_name="trainImg",
+                            field_x=0, field_y=0,
+                            field_w=400, field_h=40)
 
 
     def process(self, ttf_path, img_path):
-        # traverseFolders(newImages_from_ttf,
-                        # ttf_path, ftype='ttf')
-        # createJsonfile(img_path)
-        traverseFolders(self.get_images_from_folder,
-                        img_path, ftype='image')
+        if ttf_path is not '':
+            self.traverseFolders(newImages_from_ttf,
+                            ttf_path, ftype='ttf')
+        if img_path is not '':
+            createJsonfile(img_path)
+            self.traverseFolders(self.get_images_from_folder,
+                            img_path, ftype='image')
 
     
 if __name__ == "__main__":
@@ -98,17 +114,16 @@ if __name__ == "__main__":
         formatter_class=RawTextHelpFormatter)
 
     parser.add_argument('--ttf_path', dest='ttf',
-                        default=None, required=False,
+                        default=None, required=True,
                         help='get fonts')
     parser.add_argument('--image_path', dest='image',
                         default=None, required=True,
-                        help='get images')
+                        help='src images path')
     options = parser.parse_args()
-    ttf_path = ''
-    # ttf_path = os.path.expanduser(options.ttf)
+    ttf_path = os.path.expanduser(options.ttf)
     img_path = os.path.expanduser(options.image)
 
-    test = trainDigits()
+    test = trainDigits(debug_dir='/tmp/train_debug/')
     test.process(ttf_path, img_path)
     clf_svm, clf_rf = find_best_classifier(test.data, test.target)
 
