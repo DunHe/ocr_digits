@@ -16,10 +16,9 @@ from argparse import RawTextHelpFormatter
 from PIL import Image, ImageFont, ImageDraw
 from sklearn.externals import joblib
 from ocr_digits.common.base import Base
-from ocr_digits.ml.format import formatDigit
+from ocr_digits.imgcrop.crop import cropDigits
 from ocr_digits.ml.classifier import find_best_classifier
-from ocr_digits.ml.classifier import clf_validation
-from ocr_digits.reco_digits.recoDigits import cropDigits
+from ocr_digits.ml.accuracy import clf_validation
 
 
 description='''
