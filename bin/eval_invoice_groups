@@ -24,17 +24,6 @@ description='''
 '''
 
 
-def jsonLoad(file_path, feature, subfeature=''):
-    file = open(file_path)
-    jsons = json.loads(file.read())
-    file.close()
-
-    if subfeature != '':
-        return jsons[feature][subfeature]
-    else:
-        return jsons[feature]
-
-
 class Invoice(Base):
 
 
@@ -45,13 +34,13 @@ class Invoice(Base):
 
         img = cv2.imread(dir, 0)
 
-        daima = jsonLoad(dir+'.desc.json',
+        daima = self.jsonLoad(dir+'.desc.json',
                          'fapiaodaima', 'bounding_box')
         daima_x = int(float(daima['top_left'][0]))
         daima_y = int(float(daima['top_left'][1]))
         daima_w = int(float(daima['low_right'][0])) - daima_x
         daima_h = int(float(daima['low_right'][1])) - daima_y
-        daima_text = jsonLoad(dir+'.desc.json',
+        daima_text = self.jsonLoad(dir+'.desc.json',
                 'fapiaodaima', 'text').encode('utf-8')
 
         daima_len = 12
@@ -82,12 +71,12 @@ class Invoice(Base):
             raise ValueError("Please correct %s. "
                 "Daima len is not equal to %d " % (dir, daima_len))
 
-        haoma = jsonLoad(dir+'.desc.json', 'fapiaohaoma', 'bounding_box')
+        haoma = self.jsonLoad(dir+'.desc.json', 'fapiaohaoma', 'bounding_box')
         haoma_x = int(float(haoma['top_left'][0]))
         haoma_y = int(float(haoma['top_left'][1]))
         haoma_w = int(float(haoma['low_right'][0])) - haoma_x
         haoma_h = int(float(haoma['low_right'][1])) - haoma_y
-        haoma_text = jsonLoad(dir+'.desc.json',
+        haoma_text = self.jsonLoad(dir+'.desc.json',
                 'fapiaohaoma', 'text').encode('utf-8')
 
         haoma_len = 8

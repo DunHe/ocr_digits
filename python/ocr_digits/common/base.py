@@ -6,6 +6,7 @@ Create on 2016-01-26 19:13:47
 '''
 
 import os
+import json
 import imghdr
 import string
 import cv2
@@ -22,6 +23,8 @@ class Base:
         self.daima_target = np.array([], dtype=np.uint8)
         self.haoma_data = np.array([], dtype=np.uint8)
         self.haoma_target = np.array([], dtype=np.uint8)
+        self.digits_num = 0
+        self.digits_right = 0
         self.digit_w = digit_w
         self.digit_h = digit_h
         self.is_debug = is_debug
@@ -76,3 +79,14 @@ class Base:
                         action, 
                         dir=os.path.join(curdir, dir),
                         ftype=ftype)
+
+
+    def jsonLoad(self, file_path, feature, subfeature=''):
+        file = open(file_path)
+        jsons = json.loads(file.read())
+        file.close()
+
+        if subfeature != '':
+            return jsons[feature][subfeature]
+        else:
+            return jsons[feature]
