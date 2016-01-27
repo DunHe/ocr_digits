@@ -9,8 +9,8 @@ import copy
 import cv2
 import numpy as np
 from ocr_digits.imgproc.binproc import digit_resize
-from ocr_digits.imgproc.binaryProc import bitReverse
 from ocr_digits.imgproc.char_segments import search_char_x
+from ocr_digits.imgproc.imgstren import gamma_correction
 from ocr_digits.imgcrop.contours import inner_findContours
 from ocr_digits.imgcrop.contours import draw_contour_rect
 
@@ -32,6 +32,7 @@ def cropDigits(img,
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     cropImg = cropImage(img, img_x, img_y, img_h, img_w)
+    cropImg = gamma_correction(cropImg, 2)
     cropImg = cv2.GaussianBlur(cropImg, (5, 5), 0)
 
     binImg, contours = inner_findContours(cropImg,
