@@ -8,9 +8,10 @@ Create on 2016-01-18 10:29:14
 import copy
 import cv2
 import numpy as np
-from ocr_digits.imgproc.binproc import digit_resize
+from ocr_digits.imgproc.binary import digit_resize
+# from ocr_digits.imgproc.binproc import histogram_process
 from ocr_digits.imgproc.char_segments import search_char_x
-from ocr_digits.imgproc.imgstren import gamma_correction
+from ocr_digits.imgproc.graystren import gamma_correction
 from ocr_digits.imgcrop.contours import inner_findContours
 from ocr_digits.imgcrop.contours import draw_contour_rect
 
@@ -32,17 +33,13 @@ def cropDigits(img,
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     cropImg = cropImage(img, img_x, img_y, img_h, img_w)
-    cropImg = gamma_correction(cropImg, 2)
     cropImg = cv2.GaussianBlur(cropImg, (5, 5), 0)
+    # cropImg = histogram_process(cropImg)
+    cropImg = gamma_correction(cropImg, 2)
 
     binImg, contours = inner_findContours(cropImg,
                                   contour_filter=True,
                                   thresh='otsu')
-    # tmp = copy.deepcopy(cropImg)
-    # draw_contour_rect(tmp, contours)
-    # cv2.namedWindow('test', 1000)
-    # cv2.imshow('test', tmp)
-    # cv2.waitKey(0)
 
     rects = []
     for cnt in contours:

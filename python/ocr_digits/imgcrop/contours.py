@@ -8,7 +8,7 @@ Create on 2016-01-18 10:29:14
 import copy
 import cv2
 import numpy as np
-from ocr_digits.imgproc.binproc import bitReverse
+from ocr_digits.imgproc.binary import bitReverse
 
 
 def inner_findContours(img, 
