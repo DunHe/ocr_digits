@@ -5,8 +5,11 @@
 pip install -r requirements.txt
 
 添加下面代码到~/.bashrc中:
+
+```
 export PYTHONPATH=/path/to/ocr_digits/python:$PYTHONPATH
 export PATH=/path/to/ocr_digits/bin:$PATH
+```
 
 ### 运行
 
