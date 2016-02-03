@@ -32,7 +32,7 @@ def bitReverse(img):
 
 def digit_resize(digit, h, w):
 
-    digit = cv2.resize(digit, (h, w))
+    digit = cv2.resize(digit, (w, h))
 
     for i in range(h):
         for j in range(w):

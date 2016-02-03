@@ -9,8 +9,6 @@ import copy
 import cv2
 import numpy as np
 from ocr_digits.imgproc.binary import digit_resize
-# from ocr_digits.imgproc.binproc import histogram_process
-from ocr_digits.imgproc.char_segments import search_char_x
 from ocr_digits.imgproc.graystren import gamma_correction
 from ocr_digits.imgcrop.contours import inner_findContours
 from ocr_digits.imgcrop.contours import draw_contour_rect
@@ -34,7 +32,6 @@ def cropDigits(img,
 
     cropImg = cropImage(img, img_x, img_y, img_h, img_w)
     cropImg = cv2.GaussianBlur(cropImg, (5, 5), 0)
-    # cropImg = histogram_process(cropImg)
     cropImg = gamma_correction(cropImg, 2)
 
     binImg, contours = inner_findContours(cropImg,

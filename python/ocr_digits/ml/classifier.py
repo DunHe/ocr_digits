@@ -13,10 +13,10 @@ from sklearn.grid_search import GridSearchCV
 
 
 def find_best_classifier(data, target):
-    x_train, x_test, y_train, y_test = \
-            train_test_split(data, target,
-                             test_size = 0.4,
-                             random_state = 0)
+    # x_train, x_test, y_train, y_test = \
+            # train_test_split(data, target,
+                             # test_size = 0.4,
+                             # random_state = 0)
     param = [
         {'svm': [
             {
@@ -41,12 +41,14 @@ def find_best_classifier(data, target):
             SVC(),
             param[0].values()[0],
             n_jobs = -1)
-    clf_svm.fit(x_train, y_train)
+    # clf_svm.fit(x_train, y_train)
+    clf_svm.fit(data, target)
 
     clf_rf = GridSearchCV(
             RandomForestClassifier(),
             param[1].values()[0],
             n_jobs = -1)
-    clf_rf.fit(x_train, y_train)
+    # clf_rf.fit(x_train, y_train)
+    clf_rf.fit(data, target)
 
     return clf_svm, clf_rf

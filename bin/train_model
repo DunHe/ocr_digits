@@ -151,5 +151,5 @@ if __name__ == "__main__":
     clf_rf = joblib.load(os.path.join('..', '..',
                           'ocr_trained_model', 'trained_model_rf',
                           'trained_model_rf.pkl'))
-    clf_validation(test.data, test.target, clf_svm, 'SVM')
-    clf_validation(test.data, test.target, clf_rf, 'RandForest')
+    # clf_validation(test.data, test.target, clf_svm, 'SVM')
+    # clf_validation(test.data, test.target, clf_rf, 'RandForest')
